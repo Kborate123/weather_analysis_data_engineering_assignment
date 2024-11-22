@@ -1,26 +1,15 @@
-from dagster import define_asset_job, AssetSelection
-from processing_weather.assets import (
-    run_scrapy_spider,
-    load_mongo_data,
-    cleaned_df,
-    transform_to_csv,
-    save_to_delta_lake,
-    query_previous_version_of_data,
-    analyze_data,
-    generate_visualizations,
+from dagster import (
+    build_schedule_from_partitioned_job,
+    define_asset_job,
 )
 
-# Define the weather data job by selecting all relevant assets
-weather_data_job = define_asset_job(
-    name="weather_data_job",
-    selection=AssetSelection.assets(
-        run_scrapy_spider,
-        load_mongo_data,
-        cleaned_df,
-        transform_to_csv,
-        save_to_delta_lake,
-        query_previous_version_of_data,
-        analyze_data,
-        generate_visualizations,
-    ),
+from .partitions import (
+    daily_partitions,
+)
+
+daily_weather_data_analysis_job_schedule = build_schedule_from_partitioned_job(
+    define_asset_job(
+        "daily_weather_data_analysis_job",
+        partitions_def=daily_partitions,
+    )
 )
