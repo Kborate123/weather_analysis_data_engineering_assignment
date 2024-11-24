@@ -13,6 +13,7 @@ from pyspark.sql.types import (
     StringType,
     FloatType,
     IntegerType,
+    DateType,
     LongType,
 )
 from pymongo import MongoClient  # Import MongoDB client
@@ -99,6 +100,9 @@ def load_mongo_data(context, run_scrapy_spider):
 def cleaned_df(context, load_mongo_data):
     df = load_mongo_data
     try:
+        # convert string to datetype for date column.
+        df["date"] = pd.to_datetime(df["date"]).dt.date
+
         # Clean the data by converting temperatures from Kelvin to Celsius
         df["temperature_celsius"] = df["temperature_kelvin"] - 273.15
         df["temp_min_celsius"] = df["temp_min_kelvin"] - 273.15
@@ -162,7 +166,7 @@ def save_to_delta_lake(context, cleaned_df):
         [
             StructField("_id", StringType(), False),  # Unique identifier as String
             StructField("city", StringType(), False),  # City name as String
-            StructField("date", StringType(), False),  # Date as DateType
+            StructField("date", DateType(), False),  # Date as DateType
             StructField(
                 "temperature_kelvin", FloatType(), False
             ),  # Temperature in Kelvin as Float
