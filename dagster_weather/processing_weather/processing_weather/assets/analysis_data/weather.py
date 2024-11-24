@@ -126,8 +126,11 @@ def cleaned_df(context, load_mongo_data):
         context.log.info("Missing values handled")
         csv_path = "weather_data.csv"
 
-        # Save DataFrame to CSV
-        df.to_csv(csv_path, index=False)
+        # Check if the CSV file already exists
+        file_exists = os.path.exists(csv_path)
+
+        # Save DataFrame to CSV, including headers only if the file doesn't exist
+        df.to_csv(csv_path, mode="a", header=not file_exists, index=False)
         context.log.info(f"Data saved to CSV at: {csv_path}.")
     except Exception as e:
         print(e)
